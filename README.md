@@ -1,2 +1,2 @@
 # anonymize-py
-Anonymization library for Python.
+Anonymization library for Python Pandas.
