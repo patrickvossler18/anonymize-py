@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import anonymize as anz
+import anonymize.anonymize as anz
 import pytest
 import pandas as pd
 import numpy as np
 
 
-def test_check_deduce_types():
+def test_deduce_types():
     df = pd.DataFrame(dict(A=np.random.rand(3),
                            B=1,
                            C='foo',

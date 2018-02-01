@@ -5,6 +5,10 @@ import math
 import hashlib
 import re
 import datetime
+import random
+
+from . import exceptions
+from .sequences.radix import AlphabetSequence
 
 
 def anonymize(data,
@@ -56,7 +60,7 @@ def anonymize(data,
                                                           key['name_map'])
 
         # Get type and cardinality of the column and
-        # perform relevant replacement
+        # perform corresponding replacement
         cardinality = len(data[column].unique())
         type = type_map[column]
         type = types.get(column, type)
@@ -191,15 +195,15 @@ def date_replace(series, key=None, precision='s', timediff_max=100000):
                                           np.min([abs_diff,
                                                   timediff_max]))
         if precision == 'D':
-            shift_td = datetime.timedelta(shift)
+            shift_td = datetime.timedelta(int(shift))
         else:
-            shift_td = datetime.timedelta(0, shift)
+            shift_td = datetime.timedelta(0, int(shift))
     key['shift'] = shift
     ret = series.apply(lambda x: (x-shift_td))
     return (ret, key)
 
 
-def email_replace(series, key=None, collision_retries=10
+def email_replace(series, key=None, collision_retries=10,
                   raise_exceptions=False, quiet=False):
     shift = None
     if not key:
@@ -230,7 +234,7 @@ def email_replace(series, key=None, collision_retries=10
             key['map'][replacement] = keys[value.name]
         else:
             if raise_exceptions:
-                raise RepeatedCollision(retry)
+                raise exceptions.RepeatedCollision(retry)
             elif not quiet:
                 print('Persistent collision after %d retries' % retry)
             return None
@@ -257,7 +261,7 @@ def generic_replace(series, key=None, collision_retries=10,
             key['map'][hash] = keys[value.name]
         else:
             if raise_exceptions:
-                raise RepeatedCollision(retry)
+                raise exceptions.RepeatedCollision(retry)
             elif not quiet:
                 print('Persistent collision after %d retries' % retry)
             return None
@@ -302,7 +306,7 @@ def deduce_type_from_dtype(dtype):
     return type
 
 
-def deduce_types(data, heuristic_level=1, key=None
+def deduce_types(data, heuristic_level=1, key=None,
                  raise_exceptions=False, quiet=False):
     # Use dtype for numerical types: check if it's not a timestamp
     # For strings try date regexes and then wikidata lookups to distinguish
@@ -437,7 +441,7 @@ def transform_data(data, transformation_log, key, type_map=None,
             else:
                 # Report an error
                 if raise_exceptions:
-                    raise UnsupportedType(transformation[2])
+                    raise exceptions.UnsupportedType(transformation[2])
                 elif not quiet:
                     print('Unsupported type for change_type: %s' %
                           transformation[2])
@@ -467,29 +471,9 @@ def transform_data(data, transformation_log, key, type_map=None,
         else:
             # Report an error
             if raise_exceptions:
-                raise MissingAction(transformation[0])
+                raise exceptions.MissingAction(transformation[0])
             elif not quiet:
                 print('Unsupported action in transform_data: %s' %
                       transformation[0])
 
     return (data, key)
-
-
-class Error(Exception):
-    """ Base class for the exception """
-    pass
-
-
-class MissingAction(Error):
-    def __init__(self, action):
-        self.message = 'Unsupported action in transform_data: %s' % action
-
-
-class UnsupportedType(Error):
-    def __init__(self, type):
-        self.message = 'Unsupported type for change_type: %s' % type
-
-
-class RepeatedCollision(Error):
-    def __init__(self, retries):
-        self.message = 'Persistent hash collision after %d retries' % retries
