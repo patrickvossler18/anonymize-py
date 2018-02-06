@@ -15,7 +15,7 @@ class TimeAnonymizer:
     def __init__(self, anonymizer):
         self.anonymizer = anonymizer
 
-    def anonymize(self, series, key=None, precision='s'):
+    def anonymize(self, series, key=None, precision='s', timediff_max=100000):
         shift = None
         if not key:
             key = {}
