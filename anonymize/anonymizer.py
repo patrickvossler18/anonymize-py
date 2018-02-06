@@ -94,7 +94,7 @@ class Anonymizer():
                 self.type_based_anonymizers[type] = EmailAnonymizer(self)
             elif type == 'url':
                 self.type_based_anonymizers[type] = UrlAnonymizer(self)
-            elif type(type) == tupple:
+            elif type(type) == 'tuple':
                 type = type[0]
                 details = type[1]
                 if type == 'datetime':
