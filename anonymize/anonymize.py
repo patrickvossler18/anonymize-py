@@ -258,7 +258,7 @@ def generic_replace(series, key=None, collision_retries=10,
             hash = hashlib.sha256(np.random.bytes(25) + value).digest()
             retry += 1
         if hash not in key['map']:
-            key['map'][hash] = keys[value.name]
+            key['map'][hash] = key[value.name]
         else:
             if raise_exceptions:
                 raise exceptions.RepeatedCollision(retry)
