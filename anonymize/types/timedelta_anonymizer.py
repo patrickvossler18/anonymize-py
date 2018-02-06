@@ -14,7 +14,7 @@ class TimedeltaAnonymizer:
     def __init__(self, anonymizer):
         self.anonymizer = anonymizer
 
-    def anonymize(self, series, key=None, precision='s'):
+    def anonymize(self, series, key=None, precision='s', max_scale=1024):
         ret = None
         scale = None
         shift = None
